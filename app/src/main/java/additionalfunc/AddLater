@@ -1,0 +1,90 @@
+ private fun get_pointedcharacteristic(gatt:BluetoothGatt?,ServiceUUID:String,CharacteristicUUId:String):BluetoothGattCharacteristic? {
+
+        return gatt?.services?.find { service ->service.uuid.toString()==ServiceUUID }?.characteristics?.find {characteristic -> characteristic.uuid.toString()==CharacteristicUUId  }
+    }
+    private fun set_pointedcharacteristic(gatt: BluetoothGatt?){
+        val characteris=get_pointedcharacteristic(CharacteristicUUId = CharUUID, ServiceUUID = ServUUID, gatt = gatt)
+        if(characteris==null){return
+    }
+        else
+        {enableChar(gatt, characteris)}
+    }
+    private fun BluetoothGattCharacteristic.isIndicatable(): Boolean =
+        containsProperty(BluetoothGattCharacteristic.PROPERTY_INDICATE)
+
+    private fun BluetoothGattCharacteristic.isNotifiable(): Boolean =
+        containsProperty(BluetoothGattCharacteristic.PROPERTY_NOTIFY)
+
+    private fun BluetoothGattCharacteristic.containsProperty(property: Int): Boolean =
+        properties and property != 0
+
+    private fun enableChar(gatt:BluetoothGatt?, characteristic: BluetoothGattCharacteristic){
+        val payload=when{
+            characteristic.isIndicatable()-> BluetoothGattDescriptor.ENABLE_INDICATION_VALUE
+            characteristic.isNotifiable() -> BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+            else->return
+        }
+
+        characteristic.getDescriptor(TODO())?.let { descript->
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.BLUETOOTH_CONNECT
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return
+            }
+            if(gatt?.setCharacteristicNotification(characteristic,true)==false)
+            {return}
+            writeDescriptor(gatt,descript,payload)
+        }
+
+    }
+    private fun writeDescriptor(gatt: BluetoothGatt?,descriptor: BluetoothGattDescriptor,payload:ByteArray){
+        gatt.let { gatt->
+            descriptor.value=payload
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.BLUETOOTH_CONNECT
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return
+            }
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.BLUETOOTH_CONNECT
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return
+            }
+            gatt?.writeDescriptor(descriptor)
+        }
+
+    }
+
+"INTERNET",
+
+val L = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        if (!L.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            AccessPermission(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS), Reject)
+        }
